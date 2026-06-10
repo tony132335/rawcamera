@@ -45,12 +45,8 @@ fun ProCameraScreen(viewModel: CameraViewModel = viewModel()) {
                 .fillMaxWidth()
                 .background(Color(0xFF171717)) // neutral-900
         ) {
-            // Camera Preview will go here
-            Text(
-                "Camera2 API Preview Area",
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            // Live Camera2 API Preview
+            Camera2Preview()
             
             // Grid Lines Overlay
             androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().align(Alignment.Center)) {
@@ -99,14 +95,13 @@ fun ProCameraScreen(viewModel: CameraViewModel = viewModel()) {
                 Row(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(start = 24.dp, top = 80.dp)
-                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                        .padding(start = 16.dp, top = 64.dp)
+                        .background(Color(0xFFFFD60A).copy(alpha = 0.2f), CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("🌷 Macro Active", color = Color(0xFF4ADE80), fontSize = 12.sp)
+                    Text("微距", color = Color(0xFFFFD60A), fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }
 
@@ -143,57 +138,39 @@ fun TopBar(uiState: CameraUiState, onFlashToggle: () -> Unit, modifier: Modifier
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.6f))
+            .background(Color.Black.copy(alpha = 0.4f))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            // 50 icon
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            // 50 icon styled minimal
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
                     .clickable { },
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .border(2.dp, Color.White, androidx.compose.foundation.shape.RoundedCornerShape(2.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("50", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
+                Text("50", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
             // HDR icon
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
                     .clickable { },
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .height(16.dp)
-                        .width(24.dp)
-                        .border(2.dp, Color.White, androidx.compose.foundation.shape.RoundedCornerShape(2.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("HDR", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                }
+                Text("HDR", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             // Flash icon
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
                     .clickable { onFlashToggle() },
                 contentAlignment = Alignment.Center
             ) {
@@ -202,18 +179,17 @@ fun TopBar(uiState: CameraUiState, onFlashToggle: () -> Unit, modifier: Modifier
                     FlashMode.AUTO -> Icons.Filled.FlashAuto
                     else -> Icons.Filled.FlashOn
                 }
-                Icon(icon, contentDescription = "Flash Toggle", tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = "Flash Toggle", tint = if (uiState.flashMode == FlashMode.ON) Color(0xFFFFD60A) else Color.White, modifier = Modifier.size(24.dp))
             }
             // Settings icon
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
                     .clickable { },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -224,32 +200,38 @@ fun ProParameterBar(uiState: CameraUiState, viewModel: CameraViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .background(Color.Black.copy(alpha = 0.8f))
-            .border(1.dp, Color.White.copy(alpha = 0.05f))
+            .height(56.dp)
+            .background(Color.Black)
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(32.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val params = listOf("ISO" to uiState.iso, "SHUTTER" to "1/250", "EV" to uiState.ev.toString(), "FOCUS" to "Auto", "WB" to "5400K", "LENS" to "UW")
+        val params = listOf(
+            "ISO" to (if (uiState.iso == "Auto") "自动" else uiState.iso), 
+            "快门" to "1/250", 
+            "EV" to uiState.ev.toString(), 
+            "对焦" to "自动", 
+            "白平衡" to "5400K", 
+            "镜头" to uiState.activeLens.title
+        )
         for ((name, value) in params) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.widthIn(min = 50.dp)
+                modifier = Modifier.widthIn(min = 40.dp)
             ) {
                 Text(
                     text = name,
-                    color = if (name == "SHUTTER") Color(0xFFFACC15) else Color.White.copy(alpha = 0.4f), // yellow-400
-                    fontSize = 9.sp,
-                    letterSpacing = (-0.5).sp,
-                    fontWeight = FontWeight.Bold
+                    color = if (name == "快门") Color(0xFFFFD60A) else Color.White.copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = value,
-                    color = if (name == "SHUTTER") Color(0xFFFACC15) else Color.White.copy(alpha = 0.4f),
+                    color = if (name == "快门") Color(0xFFFFD60A) else Color.White,
                     fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = if (value.contains(Regex("[0-9]"))) FontFamily.Monospace else FontFamily.Default,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
@@ -269,34 +251,24 @@ fun ModeSelector(currentMode: CameraMode, onModeSelect: (CameraMode) -> Unit) {
                 .fillMaxSize()
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 40.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CameraMode.values().forEach { mode ->
                 if (mode == currentMode) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = mode.title.uppercase(),
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
-                            modifier = Modifier.clickable { onModeSelect(mode) }
-                        )
-                        Box(
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .size(4.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFFACC15))
-                        )
-                    }
+                    Text(
+                        text = mode.title,
+                        color = Color(0xFFFFD60A),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable { onModeSelect(mode) }
+                    )
                 } else {
                     Text(
-                        text = mode.title.uppercase(),
-                        color = Color(0xFF737373), // neutral-500
-                        fontSize = 12.sp,
-                        letterSpacing = 2.sp,
+                        text = mode.title,
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.clickable { onModeSelect(mode) }
                     )
                 }
@@ -313,20 +285,18 @@ fun BottomControlPanel(uiState: CameraUiState, onShutterClick: () -> Unit, onLen
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(128.dp)
+            .height(132.dp)
             .background(Color.Black)
-            .padding(horizontal = 32.dp),
+            .padding(horizontal = 40.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Thumbnail
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .border(2.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                .padding(2.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF262626)) // neutral-800
+                .size(48.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .background(Color(0xFF262626))
                 .clickable { /* Open Gallery */ },
             contentAlignment = Alignment.Center
         ) {
@@ -339,34 +309,32 @@ fun BottomControlPanel(uiState: CameraUiState, onShutterClick: () -> Unit, onLen
         }
 
         // Shutter Button
+        val isVideo = uiState.selectedMode == CameraMode.VIDEO
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .border(3.dp, Color.White, CircleShape)
+                .border(4.dp, Color.White, CircleShape)
                 .clickable(onClick = onShutterClick),
             contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Color.White)
+                    .clip(if (isVideo) androidx.compose.foundation.shape.RoundedCornerShape(16.dp) else CircleShape)
+                    .background(if (isVideo) Color(0xFFFF3B30) else Color.White)
             )
         }
 
-        // Lens Switch
+        // Lens Switch - iOS Style
         Box(
             modifier = Modifier
-                .size(56.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.1f))
+                .background(Color.White.copy(alpha = 0.15f))
                 .clickable(onClick = onLensSwitch),
             contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(uiState.activeLens.title, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                Icon(Icons.Filled.Autorenew, contentDescription = "Switch Lens", tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
-            }
+            Text(uiState.activeLens.title, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

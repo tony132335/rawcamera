@@ -17,12 +17,12 @@ data class CameraUiState(
 )
 
 enum class CameraMode(val title: String) {
-    NORMAL("Normal"),
-    PRO("Pro"),
-    MACRO("Macro"),
-    NIGHT("Night"),
-    VIDEO("Video"),
-    SUPER_MOON("Super Moon")
+    NORMAL("照片"),
+    PRO("专业"),
+    MACRO("微距"),
+    NIGHT("夜景"),
+    VIDEO("视频"),
+    SUPER_MOON("超级月亮")
 }
 
 enum class FlashMode(val iconName: String) {

@@ -134,6 +134,35 @@ class Camera2Manager(private val context: Context) {
         Log.i("SuperMoon", "Fetching high-res moon texture based on GPS/Time and applying via OpenCV overlay.")
     }
 
+    fun startPreview(surface: Surface) {
+        val device = cameraDevice ?: return
+        try {
+            // Because we switch between Pro and Normal modes, for a standard preview we use TEMPLATE_PREVIEW
+            val builder = device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            builder.addTarget(surface)
+
+            // Auto-focus and auto-exposure for default preview
+            builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+            
+            device.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
+                override fun onConfigured(session: CameraCaptureSession) {
+                    captureSession = session
+                    try {
+                        session.setRepeatingRequest(builder.build(), null, null)
+                    } catch (e: Exception) {
+                        Log.e("Camera2", "Failed to start camera preview", e)
+                    }
+                }
+
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    Log.e("Camera2", "Failed to configure capture session")
+                }
+            }, null)
+        } catch (e: Exception) {
+            Log.e("Camera2", "Exception starting preview", e)
+        }
+    }
+
     fun closeCamera() {
         captureSession?.close()
         captureSession = null
