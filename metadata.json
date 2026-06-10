@@ -1,0 +1,6 @@
+{
+  "name": "Pro Camera",
+  "description": "Professional Grade Manual Camera Application",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
